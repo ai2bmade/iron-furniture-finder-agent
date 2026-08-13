@@ -1,0 +1,14 @@
+{
+  "name": "finder-agent-factory",
+  "version": "1.0.0",
+  "description": "버티컬별 B2B Finder Agent(OpenClaw skill)를 생성하는 메타 에이전트",
+  "type": "module",
+  "main": "generate-finder-agent.js",
+  "scripts": {
+    "start": "node generate-finder-agent.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
+    "dotenv": "^16.4.5"
+  }
+}
