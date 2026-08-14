@@ -13,9 +13,13 @@ ai2bmade/
 │   │   └── finder-agent-methodology.md   # 4대 카테고리 고정 방법론 문서
 │   ├── package.json
 │   └── .env.example
-└── skills/                    # OpenClaw workspace skill root
-    └── handmade-furniture-finder/
-        └── SKILL.md           # 1번째 테스트 버티컬 (팩토리로 생성한 예시)
+├── skills/                     # OpenClaw workspace skill root (Telegram/VPS 배포)
+│   ├── handmade-metal-furniture-decor-finder/
+│   │   └── SKILL.md           # 1번째 테스트 버티컬 (팩토리로 생성한 예시)
+│   └── household-care-robot-finder/
+│       └── SKILL.md           # 2번째 버티컬
+└── .claude/skills/             # Claude Code 대화형 전용 스킬 (VPS 배포 안 함, 자세한
+                                 # 내용·구분 이유는 CLAUDE.md 참고)
 ```
 
 ## 전체 워크플로우
@@ -38,7 +42,7 @@ ai2bmade/
    OpenClaw가 skills/ 를 workspace skill root로 자동 스캔·인식
         │
         ▼
-   Telegram으로 "/finder handmade-furniture" 또는 자연어 요청
+   Telegram으로 "/finder handmade-metal-furniture-decor" 또는 자연어 요청
         │
         ▼
    Finder Agent 실행 → 4대 카테고리 조사 → 결과 요약을 Telegram으로 전송

@@ -39,14 +39,48 @@ ai2bmade/
 │   ├── .env.example
 │   └── templates/
 │       └── finder-agent-methodology.md   # 고정 방법론 (사람이 읽는 기준 문서)
-└── skills/                            # OpenClaw workspace skill root
-    └── handmade-metal-furniture-decor-finder/
-        └── SKILL.md                   # 1번 테스트 버티컬 (아래 히스토리 참고)
+├── skills/                            # OpenClaw workspace skill root (Telegram/VPS 배포용)
+│   └── handmade-metal-furniture-decor-finder/
+│       └── SKILL.md                   # 1번 테스트 버티컬 (아래 히스토리 참고)
+└── .claude/skills/                    # Claude Code 프로젝트 스킬 (대화형, 배포 대상 아님)
+    ├── 수출바이어파인더/skill.md       # 링크드인 PDF → 등급 분류 → 엑셀/리포트
+    ├── 유틸리티바이어소스리서치/skill.md
+    └── 리테일바잉시그널모니터링/skill.md
 ```
 
 `generate-finder-agent.js`와 `finder-agent-methodology.md`는 항상 같은
 내용을 유지해야 합니다 (전자가 실제 동작 로직, 후자가 사람이 읽는 문서).
 한쪽을 고치면 다른 쪽도 같이 고치세요.
+
+### `skills/` vs `.claude/skills/` — 두 스킬 트리가 공존하는 이유
+
+이 저장소에는 성격이 다른 두 스킬 계열이 있습니다. 원래 `E:\Finder_agent`에
+따로 있던 "수출바이어파인더" 계열을 2026-08-15에 이 저장소로 병합하면서
+구분이 생겼습니다.
+
+- **`skills/` (OpenClaw 배포용)**: `finder-agent-factory`가 생성하는 버티컬별
+  Finder Agent. git push → Hostinger VPS → Telegram 트리거 구조로 자동 실행됨.
+  SKILL.md 형식(name/description/version frontmatter).
+- **`.claude/skills/` (Claude Code 대화형 전용)**: 사람이 Claude Code로 직접
+  세션을 열고 트리거하는 스킬. VPS로 배포되지 않고, 이 폴더에서 작업할 때만
+  Claude Code가 자동 인식. 링크드인 PDF 파싱, 등급 분류(A~X), 엑셀/Full
+  Report 생성처럼 사람의 판단·중간 확인이 필요한 무거운 워크플로우가 여기 속함.
+  형식은 원본(`skill.md`, 소문자)을 그대로 유지 — OpenClaw SKILL.md로 변환하지
+  않았음 (변환 시 PDF 파싱·등급 로직 등 세부 로직 손실 위험 때문).
+
+두 트리는 서로 다른 목적(자동 배치 실행 vs 대화형 심층 리서치)이므로 앞으로도
+통합하지 않고 병행 유지합니다. 새 스킬을 추가할 때 "정기적으로 자동 실행돼야
+하는가"(→ `skills/`) "사람이 PDF 등 파일을 직접 넘기며 대화로 진행해야 하는가"
+(→ `.claude/skills/`)로 위치를 판단하세요.
+
+### 실제 작업 결과물(고객사 리서치 산출물)은 이 저장소에 없음
+
+`.claude/skills/수출바이어파인더`로 실제 생성한 산출물(엑셀·PDF·Full Report,
+예: 뷰티/전기장비 케이스)은 `E:\Finder_agent\Beuty\`,
+`E:\Finder_agent\Electric_equipment\`에 그대로 남아 있습니다. 이 저장소는
+GitHub(`ai2bmade`)로 push되므로, 실제 고객사·바이어 리스트가 담긴 민감한
+결과물은 의도적으로 이 저장소 밖에 보관합니다. `E:\Finder_agent`는 이제
+스킬 정의 없이 순수 작업 결과물 저장 용도로만 사용됩니다.
 
 ## 핵심 설계 원칙 (모든 Finder Agent에 고정)
 
