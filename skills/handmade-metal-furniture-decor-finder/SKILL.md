@@ -1,7 +1,7 @@
 ---
 name: handmade-metal-furniture-decor-finder
 description: 철제 감성 가구(선반·책장·테이블·수납장·모듈러 선반) 버티컬의 해외 B2B 엔드유저/파트너/디스트리뷰터/경쟁사를 조사하는 Finder Agent.
-version: 1.0.0
+version: 1.2.0
 ---
 
 # Metal-Aesthetic Furniture Finder Agent
@@ -13,6 +13,41 @@ version: 1.0.0
 - "디자이너 가구 시장 조사해줘", "디자이너 가구샵 찾아줘"
 - 정기 실행 스케줄(cron)에서 이 스킬이 호출될 때
 - 사용자가 `/finder handmade-metal-furniture-decor` 형태로 명시적으로 호출할 때
+- 아래 "짧은 호출 문법"에 해당하는 메시지가 올 때
+
+### 짧은 호출 문법 (Quick Trigger)
+
+Telegram에서 매번 긴 문장을 치지 않도록, 아래 패턴이 오면 자동으로 이 스킬을
+"해당 국가/도시 1곳만" 대상으로 실행합니다 (39절 로테이션 전체를 도는 대신
+지정된 지역 하나만 조사).
+
+**패턴**: `<접두어>_<국가 또는 도시명>`
+
+- 접두어: `철제`, `iron`, `metal` 중 아무거나 (대소문자 무관)
+- 구분자: 언더스코어(`_`) — 띄어쓰기(`철제 에스토니아`)도 동일하게 인식
+- 지역명: 국가명 또는 도시명, 한글/영문 모두 허용
+
+예시:
+```text
+철제_에스토니아   →  에스토니아 1개국만 조사
+철제_보스턴       →  보스턴(미국) 도시 단위로 조사
+iron_boston       →  위와 동일 (영문 표기)
+iron_estonia      →  에스토니아 1개국만 조사
+metal_dubai       →  두바이(UAE) 도시 단위로 조사
+```
+
+**처리 규칙**:
+1. 지역명이 "타겟 국가/지역" 목록(아래 섹션)에 있는 국가/그 소속 도시면 그대로 사용.
+2. 목록에 없는 국가/도시가 들어와도 거부하지 말고 조사를 진행하되, 리포트 상단에
+   "타겟 국가 목록 외 지역 — 임시 추가 조사"라고 표시.
+3. 도시명이 오면 해당 도시가 속한 국가 전체가 아니라 **그 도시(및 인접 상권)로
+   범위를 좁혀서** 조사 — 예: `철제_보스턴`은 미국 전체가 아니라 보스턴 지역의
+   디자인 편집숍/호스피탈리티 바이어 위주로 조사.
+4. 이 방식으로 실행한 결과는 정식 로테이션 기록(어느 국가를 이미 조사했는지)과
+   별도로 취급 — 로테이션 순번을 소모하지 않음. 즉 `철제_에스토니아`를 먼저
+   실행해도, 정규 로테이션이 에스토니아 차례가 됐을 때 다시 조사함(스킵하지 않음).
+5. Telegram 응답은 기존 출력 형식(카테고리별 표)을 그대로 따르되, 리포트 제목에
+   호출에 사용된 지역명을 명시 (예: "철제 감성 가구 — 에스토니아 리포트").
 
 ## 버티컬 정의
 
@@ -81,11 +116,29 @@ version: 1.0.0
   Pinterest에서 유사 스타일을 다루는 편집숍 계정, 인테리어·가구 박람회 참가사 리스트
 
 ### 2. 잠재 파트너 (Potential Partner)
-- 철제 원자재 밀 또는 워크숍과 공동 컬렉션을 낼 수 있는 해외 가구 디자이너/스튜디오
+- **해외 가구 디자이너 (독립/프리랜서, 신진 디자이너 포함)** — 이 버티컬의
+  핵심 파트너 유형. 철제 소재 제조 역량(용접·마감)은 있지만 자체 디자인
+  라인업이 상대적으로 약할 수 있으므로, 디자인력을 가진 해외 독립 디자이너와의
+  협업이 특히 레버리지가 큽니다. 아래 형태의 협업 가능성을 염두에 두고 조사:
+  - **게스트 디자이너 콜라보** — 디자이너 이름을 건 캡슐 컬렉션 공동 출시
+  - **디자인 라이선싱** — 디자이너의 기존 디자인을 철제로 제작·판매하고
+    로열티 지급
+  - **공동 개발(Co-design)** — 신제품을 처음부터 함께 기획
+  - 조사 항목에 "디자이너 개인 브랜드명/포트폴리오명"과 "이미 협업 이력이
+    있는 제조사·브랜드"(있다면 경쟁사 파악에도 활용)를 추가로 기록
+  - 조사 방법: Behance·Coroflot·Dezeen Showcase에서 철제/메탈/인더스트리얼
+    가구 태그로 포트폴리오 검색, Dezeen·ArchDaily·Design Milk의 "신진
+    디자이너" 소개 기사, 각국 디자인 스쿨(예: Design Academy Eindhoven,
+    RCA, ECAL) 졸업작품전 아카이브, Instagram 해시태그(#furnituredesigner,
+    #metalfurnituredesign, #industrialdesigner) 상위 계정, 국제 가구 박람회
+    (Salone del Mobile 위성전시 Fuorisalone, Ventura Design 등)의 신진
+    디자이너 부스 리스트
+- 철제 원자재 밀 또는 워크숍과 공동 컬렉션을 낼 수 있는 해외 가구 디자인 스튜디오
 - 모듈러 가구 시스템을 다루는 해외 디자인 스튜디오 (조립형 선반 공동 개발 가능성)
 - 지속가능성·업사이클링을 강조하는 해외 크래프트 브랜드 (공동 마케팅 대상)
 - 조사 방법: Etsy/1stDibs/Chairish 등 마켓플레이스에서 상위 가구 판매자,
-  가구 디자인 어워드(예: German Design Award) 수상 스튜디오 목록
+  가구 디자인 어워드(예: German Design Award, iF Design Award, Red Dot)
+  수상 개인 디자이너·스튜디오 목록
 
 ### 3. 잠재 디스트리뷰터 (Potential Distributor)
 - 이미 인더스트리얼/메탈 가구(선반, 책장, 테이블, 수납장, 모듈러 선반)를
@@ -242,6 +295,10 @@ AEO/GEO 개선" 프로젝트의 벤치마크 자료로 재사용합니다.
   하우스웨어·기프트 B2B 전시회 — 브라질/파나마/에콰도르/페루/멕시코 바이어 참가)
 - B2B 소싱: Global Sources, Alibaba(경쟁사·원자재 공급망 파악용)
 - SNS: Instagram, Pinterest (비주얼 기반 카테고리라 SNS 비중이 높음)
+- 디자이너 포트폴리오/발굴 채널 (잠재 파트너 조사용): Behance, Coroflot,
+  Dezeen(Showcase 및 신진 디자이너 기사), ArchDaily, Design Milk, 각국 디자인
+  스쿨 졸업작품전(Design Academy Eindhoven, RCA, ECAL 등), Salone del Mobile
+  위성전시(Fuorisalone, Ventura Design)
 
 > 참고: 위 박람회 정보는 웹 조사 시점 기준이며, 실제 활용 전 최신 개최 일정과
 > 참가 조건을 별도로 확인하세요.
@@ -249,12 +306,14 @@ AEO/GEO 개선" 프로젝트의 벤치마크 자료로 재사용합니다.
 ## 검색 키워드
 
 한글: 철제 선반 도매, 인더스트리얼 책장 수출, 철제 테이블 바이어, 철제 수납장
-도매, 모듈러 철제 선반 유통, 철제 감성 가구 수출, 디자이너 철제 가구
+도매, 모듈러 철제 선반 유통, 철제 감성 가구 수출, 디자이너 철제 가구, 가구
+디자이너 협업, 신진 가구 디자이너
 영문: metal shelving unit wholesale, industrial bookcase distributor, metal
 frame table buyer, steel storage cabinet wholesale, modular metal shelving
 system distributor, welded furniture manufacturer export, industrial-style
 metal furniture wholesale, designer metal furniture, designer furniture
-boutique metal
+boutique metal, independent furniture designer collaboration, emerging
+furniture designer metal, furniture designer licensing
 
 ## 주의할 제약사항
 
