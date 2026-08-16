@@ -1,7 +1,7 @@
 ---
 name: handmade-metal-furniture-decor-finder
 description: 철제 감성 가구(선반·책장·테이블·수납장·모듈러 선반) 버티컬의 해외 B2B 엔드유저/파트너/디스트리뷰터/경쟁사를 조사하는 Finder Agent.
-version: 1.2.0
+version: 1.3.0
 ---
 
 # Metal-Aesthetic Furniture Finder Agent
@@ -282,6 +282,14 @@ AEO/GEO 개선" 프로젝트의 벤치마크 자료로 재사용합니다.
 
 ## 데이터 소스 (이 버티컬 특화)
 
+- **뉴스/보도자료 검색 (최우선 소스)**: 일반 디렉토리 검색보다 파트너십·
+  투자·전시회 수상 뉴스가 신호 밀도가 높다 (2026-08-16 다른 버티컬
+  실증 확인 후 공통 원칙으로 반영). 검색 패턴: "[브랜드/편집숍명]
+  partnership 2026", "[회사명] raises funding", "[전시회명] 2026 award
+  winner", "[회사명] acquisition". 추천 매체: Dezeen, Business of Home,
+  Interior Design, ArchDaily, Design Milk(디자인 전문지),
+  PRNewswire·BusinessWire·Crunchbase(펀딩/M&A). 뉴스로 찾은 항목은
+  발견채널 "뉴스"로 태깅.
 - 마켓플레이스: Etsy, 1stDibs, Chairish, Amazon Handmade
 - 박람회/전시회 (북미·유럽): Maison&Objet(프랑스), High Point Market(미국),
   IMM Cologne(독일), Ambiente(독일)

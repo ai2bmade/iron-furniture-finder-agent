@@ -27,31 +27,57 @@ Hostinger VPS (OpenClaw 사전 설치됨)
 Telegram으로 트리거 → Finder Agent 실행 → 결과를 Telegram으로 회신
 ```
 
-## 저장소 구조
+## 저장소 구조 — 2026-08-16부터 마켓마다 별도 레포로 분리됨
+
+이 레포(`iron-furniture-finder-agent`, 로컬 경로 `G:\Claude Code\agent-factory`)는
+**허브** 역할과 **철제 가구 버티컬의 배포 레포** 역할을 겸합니다. 다른
+버티컬(돌봄/펫/서비스 로봇 등)은 각자 자기 GitHub 레포 + 자기 Telegram
+봇을 갖습니다 — 상세 이유는 아래 "마켓별 레포 분리" 절 참고.
 
 ```
-ai2bmade/
+agent-factory/ (이 레포 — 허브 + 철제가구 배포)
 ├── CLAUDE.md                          # 이 문서
 ├── README.md                          # 사용자용 워크플로우 안내 (설치/배포 방법)
-├── finder-agent-factory/              # 메타 에이전트 (에이전트를 만드는 에이전트)
+├── finder-agent-factory/              # 메타 에이전트 (에이전트를 만드는 에이전트) — 모든 마켓 공용
 │   ├── generate-finder-agent.js       # 실제 생성 로직 (Claude API 호출)
 │   ├── package.json
 │   ├── .env.example
 │   └── templates/
-│       └── finder-agent-methodology.md   # 고정 방법론 (사람이 읽는 기준 문서)
-├── skills/                            # OpenClaw workspace skill root (Telegram/VPS 배포용)
+│       └── finder-agent-methodology.md   # 고정 방법론 (사람이 읽는 기준 문서) — 모든 마켓 공용
+├── skills/                            # 철제 가구 버티컬만 (이 레포 자체가 그 배포 레포)
 │   └── handmade-metal-furniture-decor-finder/
 │       └── SKILL.md                   # 1번 테스트 버티컬 (아래 히스토리 참고)
-└── .claude/skills/                    # Claude Code 프로젝트 스킬 (대화형, 배포 대상 아님)
+└── .claude/skills/                    # Claude Code 프로젝트 스킬 (대화형, 어느 VPS에도 배포 안 함) — 모든 마켓 공용
     ├── 수출바이어파인더/skill.md       # 링크드인 PDF → 등급 분류 → 엑셀/리포트
     ├── 유틸리티바이어소스리서치/skill.md
     ├── 리테일바잉시그널모니터링/skill.md
-    └── 돌봄로봇바이어소스리서치/skill.md   # 2026-08-16 추가, skills/household-care-robot-finder(OpenClaw)와 대화형 짝
+    └── 돌봄로봇바이어소스리서치/skill.md   # household-care-robot-finder(OpenClaw)와 대화형 짝
+
+robot_market/ (별도 레포 — https://github.com/ai2bmade/robot_market)
+└── skills/household-care-robot-finder/SKILL.md   # 봇: @RobotMarketFinderBot
 ```
 
 `generate-finder-agent.js`와 `finder-agent-methodology.md`는 항상 같은
 내용을 유지해야 합니다 (전자가 실제 동작 로직, 후자가 사람이 읽는 문서).
-한쪽을 고치면 다른 쪽도 같이 고치세요.
+한쪽을 고치면 다른 쪽도 같이 고치세요. 이 둘과 `.claude/skills`는 어느
+마켓 레포를 작업하든 이 허브 레포(`agent-factory`)를 기준으로 삼습니다.
+
+### 마켓별 레포 분리 (2026-08-16)
+
+원래 모든 버티컬의 `skills/`가 이 레포 하나에 있었으나, **마켓마다 배포와
+Telegram 봇을 독립시키기 위해 분리**하기로 함. 계기: `household-care-robot-finder`를
+실증 검증하는 세션 도중 사용자가 "다른 시장마다 모두 레포와 텔레그램
+봇을 달리하자"고 결정. 이후 새 버티컬은:
+
+1. SKILL.md 생성/수정은 계속 이 허브 레포(`finder-agent-factory`)에서 진행
+2. 완성되면 그 마켓 전용 새 GitHub 레포(빈 레포를 먼저 만들어둠)의
+   `skills/<slug>/`로 옮겨 push
+3. VPS에서 그 마켓 레포만 별도 clone/pull, 별도 OpenClaw workspace,
+   별도 Telegram 봇에 연결
+
+철제 가구는 아직 이 허브 레포에서 같이 배포되고 있음 (별도 레포로
+분리 안 함 — 굳이 지금 옮길 필요가 없다고 판단, 필요해지면 같은 절차로
+분리 가능).
 
 ### `skills/` vs `.claude/skills/` — 두 스킬 트리가 공존하는 이유
 
@@ -104,7 +130,13 @@ GitHub(`ai2bmade`)로 push되므로, 실제 고객사·바이어 리스트가 �
    경쟁사의 공개 레퍼런스·유통망·세일즈 담당자를 통해 그 경쟁사의 실제
    고객사까지 추적해서 엔드유저 후보로 편입. (LinkedIn 등 개인정보는 공개
    범위 내에서만, 대량 스크래핑 금지 — 이 주의사항은 매번 명시)
-5. **짧은 호출 문법(Quick Trigger)**: 2026-08-16 추가. 버티컬마다 정식
+5. **뉴스/보도자료 검색을 최우선 소스로 취급**: 2026-08-16 추가.
+   하우스홀드 로봇 버티컬 실전 테스트에서 파트너십·투자·파일럿·인수 뉴스가
+   일반 회사 디렉토리나 LinkedIn 키워드 검색보다 훨씬 신호 밀도가 높다는
+   게 확인됨(LinkedIn 직함 기반 사람 검색 적중률은 3% 수준에 그침). 모든
+   버티컬의 SKILL.md에 뉴스 검색 패턴과 업계 전문 매체를 명시하고,
+   "발견 채널"에 "뉴스"를 정식 항목으로 포함.
+6. **짧은 호출 문법(Quick Trigger)**: 2026-08-16 추가. 버티컬마다 정식
    트리거 문장("철제 가구 시장 조사해줘" 등) 대신 `<트리거 단어>_<지역>`
    형태로 Telegram에서 즉시 특정 국가/도시 1곳만 조사하도록 함. 트리거
    단어는 버티컬 생성 시 1~3개씩 고정 배정(한글+영문), 다른 버티컬과
@@ -116,7 +148,8 @@ GitHub(`ai2bmade`)로 push되므로, 실제 고객사·바이어 리스트가 �
 | 버티컬 | 스킬 slug | 배정 단어 |
 |---|---|---|
 | 철제 감성 가구 | `handmade-metal-furniture-decor-finder` | 철제, iron, metal |
-| 돌보미/펫 로봇 | `household-care-robot-finder` | 돌봄, care, 펫, pet |
+| 돌보미/펫 로봇 (B2C) | `household-care-robot-finder` (모드 A) | 돌봄, care, 펫, pet |
+| 서비스/도우미 로봇 (B2B) | `household-care-robot-finder` (모드 B) | 도우미, helper |
 
 새 버티컬을 만들 때 팩토리 인터뷰에서 트리거 단어를 물어보면, 반드시 이
 표를 먼저 확인해 중복을 피하고 새 배정을 이 표에 추가하세요.
@@ -161,6 +194,45 @@ GitHub(`ai2bmade`)로 push되므로, 실제 고객사·바이어 리스트가 �
    대표 개인이 구매를 결정하는 경우가 많기 때문. (이 논의 과정에서 이
    모듈이 애초에 "고정"이 아니라 "조건부"여야 한다는 게 명확해짐 — 4번
    항목 참고)
+
+## 2번 버티컬: 하우스홀드/서비스 로봇 — 실전 테스트로 드러난 B2C/B2B 모드 분리
+
+`household-care-robot-finder`는 팩토리를 거치지 않고 수동으로 만들었다가,
+2026-08-16에 Claude Code로 실제 웹검색을 돌려가며 방법론이 진짜 쓸만한
+리드를 찾아내는지 검증하는 세션을 가졌다. 이 과정에서 방법론 자체보다
+**버티컬 범위 정의가 잘못됐다는 게** 드러나 구조를 다시 짰다.
+
+1. 처음엔 "돌보미 로봇 + 펫 로봇" 2개 라인으로 좁게 시작.
+2. 디스트리뷰터 카테고리 검증 중 "temi"(텔레프레즌스/리셉션 로봇)를
+   경쟁제품 예시로 넣었는데, 실제로 temi의 딜러망(원격의료 리셀러, 치과
+   전문업체, RobotLAB 같은 로보틱스 통합업체)을 링크드인으로 확인하다
+   보니 이건 애초에 "가정용 돌봄"이 아니라 **호텔·병원·상업시설이
+   구매하는 B2B 서비스 로봇**이라는 게 명확해짐 → "로봇 도우미"를 3번째
+   제품 라인으로 추가하려던 참이었음.
+3. 그런데 추가하려는 순간, **B2C(돌봄/펫)와 B2B(도우미)를 같은 트리거
+   단어 세트로 묶으면 짧은 호출(`care_독일` 등) 하나에 성격이 완전히
+   다른 두 시장이 동시에 섞여 나온다**는 지적이 나옴. 최종구매자
+   (개인 vs 조직), 유통 동선(소비자 마켓플레이스 vs 로보틱스
+   통합업체·B2B 딜러망), 영업 사이클(즉시구매 vs PoC~계약)이 전부 달라
+   하나의 실행에 섞으면 리포트 품질이 떨어짐.
+4. 최종적으로 **"모드 A(B2C) / 모드 B(B2B)"로 스킬 내부를 완전히
+   분리**하기로 함 — 트리거 단어(모드 A: 돌봄/care/펫/pet, 모드 B:
+   도우미/helper)부터 4대 카테고리 조사 내용, AI 답변엔진 질의, B2C
+   온라인 판매 채널 섹션(모드 B는 생략)까지 전부 모드별로 나눠 기술.
+   한 번의 실행은 반드시 모드 하나만 조사한다는 규칙을 명시.
+5. **이 패턴("한 버티컬 안에 최종구매자 성격이 다른 B2C/B2B가 섞여있으면
+   모드로 분리하고 트리거 단어도 분리한다")은 다음 버티컬에도 재사용
+   대상.** 특히 로드맵의 "헬스케어 하드웨어"는 소비자용 웨어러블(B2C)과
+   병원 조달 의료기기(B2B)가 섞일 가능성이 높아 미리 이 패턴을 염두에
+   둘 것.
+6. 이 검증 세션에서 회사명/사람 검색을 LinkedIn으로 직접 돌려본 결과와
+   뉴스·보도자료 검색으로 찾은 결과를 비교하니 품질 차이가 뚜렷했다
+   (LinkedIn 직함 검색 적중률 3% 수준 vs 뉴스 검색에서 Andromeda
+   Robotics·Rovex×BayCare·Kanematsu×ElliQ 같은 고품질 리드 다수 확보).
+   이 발견을 "뉴스/보도자료 검색 최우선" 원칙으로 고정 방법론에 승격시킴
+   (위 "핵심 설계 원칙" 5번 참고) — `finder-agent-methodology.md`,
+   `generate-finder-agent.js`, 그리고 `handmade-metal-furniture-decor-finder`
+   에도 소급 반영함.
 
 ## Claude Code에게 요청하는 작업
 
